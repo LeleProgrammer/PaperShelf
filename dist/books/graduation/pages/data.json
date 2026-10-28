@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "title": "毕业照之外的我们",
+  "language": "zh-CN",
+  "writing_started_at": "2026-10-28T07:00:43+08:00",
+  "writing_completed_at": "2026-10-28T07:13:08+08:00",
+  "timezone": "Asia/Shanghai",
+  "tags": {
+    "genre": [
+      "日本轻小说",
+      "现实校园",
+      "青春恋爱"
+    ],
+    "themes": [
+      "离别",
+      "成长",
+      "摄影",
+      "亲情"
+    ],
+    "setting": [
+      "当代日本",
+      "高中",
+      "大学"
+    ],
+    "tone": [
+      "克制",
+      "忧伤",
+      "遗憾但有希望"
+    ],
+    "narrative": [
+      "第一人称",
+      "限知视角",
+      "伏笔回收"
+    ]
+  },
+  "body_character_count": 20337,
+  "pdf_file": "../毕业照之外的我们.pdf",
+  "page_count": 59,
+  "page_pattern": "P%04d.png",
+  "render_dpi": 200,
+  "chapters": [
+    {
+      "title": "第一章　没有被选中的那一张",
+      "body_page": 1,
+      "physical_page": 4
+    },
+    {
+      "title": "第二章　请不要在这里微笑",
+      "body_page": 7,
+      "physical_page": 10
+    },
+    {
+      "title": "第三章　借给你的夏天有使用期限",
+      "body_page": 13,
+      "physical_page": 16
+    },
+    {
+      "title": "第四章　你替我决定的好天气",
+      "body_page": 20,
+      "physical_page": 23
+    },
+    {
+      "title": "第五章　原来你也没有看镜头",
+      "body_page": 27,
+      "physical_page": 30
+    },
+    {
+      "title": "第六章　毕业不是最后一页",
+      "body_page": 34,
+      "physical_page": 37
+    },
+    {
+      "title": "第七章　后来，我们仍然通电话",
+      "body_page": 41,
+      "physical_page": 44
+    },
+    {
+      "title": "尾声　这一张也请留下",
+      "body_page": 51,
+      "physical_page": 54
+    }
+  ]
+}
