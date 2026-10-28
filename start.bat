@@ -1,12 +1,17 @@
 @echo off
 rem SPDX-License-Identifier: GPL-3.0-only
+setlocal
 cd /d "%~dp0"
-echo PaperShelf - http://localhost:8000
-echo Keep this window open. Press Ctrl+C to stop.
 where py >nul 2>nul
 if %errorlevel%==0 (
-  py -3 -m http.server 8000 --bind 127.0.0.1 --directory dist
+  py -3 "%~dp0scripts\serve.py"
 ) else (
-  python -m http.server 8000 --bind 127.0.0.1 --directory dist
+  where python >nul 2>nul
+  if errorlevel 1 (
+    echo Python 3.9 or later is required. Install Python and try again.
+    pause
+    exit /b 1
+  )
+  python "%~dp0scripts\serve.py"
 )
-pause
+if errorlevel 1 pause

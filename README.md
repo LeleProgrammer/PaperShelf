@@ -10,15 +10,21 @@ PaperShelf 是一个以 PNG 页面阅读电子书的静态网站。纯 HTML + CS
 
 - Windows：双击 `start.bat`。
 - macOS / Linux：在项目目录运行 `sh start.sh`。
-- 打开 **http://localhost:8000**。保持命令窗口开启，按 Ctrl+C 停止。
+- 启动器先自检 HTML、CSS、JavaScript 和作品清单，再自动打开浏览器。默认地址为 **http://127.0.0.1:8000/**；若端口已占用，会顺延使用其他端口，以命令窗口显示的地址为准。保持窗口开启，按 Ctrl+C 停止。
 
 也可手动执行：
 
 ```sh
-python -m http.server 8000 --bind 127.0.0.1 --directory dist
+python scripts/serve.py
 ```
 
-不要直接双击 `dist/index.html`，浏览器的 file:// 限制会阻止读取 JSON。若 8000 端口被占用，将命令中的端口改为 8001，并访问对应地址。
+不要直接双击 `dist/index.html`，浏览器的 file:// 限制会阻止读取 JSON。启动器会自动处理端口占用，也可以用 `python scripts/serve.py --port 8010` 指定起始端口。加上 `--no-browser` 可关闭自动打开浏览器。
+
+## 本地样式未加载时
+
+先关闭旧启动窗口，将修正版完整解压到新文件夹，再运行 start.bat。请使用启动器自动打开的地址，不要直接打开 HTML 文件，也不要沿用旧窗口的端口。
+
+修正版固定 CSS、JavaScript、JSON 等资源的 Content-Type，不依赖 Windows 的文件类型配置；使用绝对 dist 路径，并禁止本地预览缓存旧版资源。启动窗口显示 `HTML / CSS / JavaScript / catalog: OK` 后才打开浏览器。若仍看到旧样式，可按 Ctrl+F5 刷新。
 
 ## 新增作品
 
