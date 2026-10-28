@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "title": "请不要替我记住那个夏天",
+  "language": "zh-CN",
+  "writing_started_at": null,
+  "writing_completed_at": "2026-10-28T22:35:05.510393+08:00",
+  "timezone": "Asia/Shanghai",
+  "tags": {
+    "genre": [
+      "日本轻小说",
+      "青春悬疑",
+      "成长小说"
+    ],
+    "themes": [
+      "记忆",
+      "依恋",
+      "离别",
+      "亲情",
+      "自我选择"
+    ],
+    "setting": [
+      "当代日本",
+      "地方小城",
+      "暑期旅行"
+    ],
+    "tone": [
+      "克制",
+      "忧伤",
+      "有代价的希望"
+    ],
+    "narrative": [
+      "第一人称",
+      "交替限知视角",
+      "伏笔回收"
+    ]
+  },
+  "body_character_count": 114851,
+  "pdf_file": "../请不要替我记住那个夏天.pdf",
+  "page_count": 286,
+  "page_pattern": "P%04d.png",
+  "render_dpi": 200,
+  "chapters": [
+    {
+      "title": "第一章 寄给死者的包裹",
+      "body_page": 1,
+      "physical_page": 4
+    },
+    {
+      "title": "第二章 她穿着姐姐的衬衫",
+      "body_page": 16,
+      "physical_page": 19
+    },
+    {
+      "title": "第三章 第一站没有海",
+      "body_page": 32,
+      "physical_page": 35
+    },
+    {
+      "title": "第四章 请把那一段关掉",
+      "body_page": 49,
+      "physical_page": 52
+    },
+    {
+      "title": "第五章 我们约好不说的事",
+      "body_page": 66,
+      "physical_page": 69
+    },
+    {
+      "title": "第六章 三个人的房间，四个人的行李",
+      "body_page": 84,
+      "physical_page": 87
+    },
+    {
+      "title": "第七章 你也觉得她很烦吧",
+      "body_page": 98,
+      "physical_page": 101
+    },
+    {
+      "title": "第八章 没有收音的下午",
+      "body_page": 111,
+      "physical_page": 114
+    },
+    {
+      "title": "第九章 被剪掉的人",
+      "body_page": 121,
+      "physical_page": 124
+    },
+    {
+      "title": "第十章 她原本就打算离开",
+      "body_page": 134,
+      "physical_page": 137
+    },
+    {
+      "title": "第十一章 不是所有沉默都叫温柔",
+      "body_page": 147,
+      "physical_page": 150
+    },
+    {
+      "title": "第十二章 我替你决定的明天",
+      "body_page": 160,
+      "physical_page": 163
+    },
+    {
+      "title": "第十三章 那份没有交出去的声音",
+      "body_page": 175,
+      "physical_page": 178
+    },
+    {
+      "title": "第十四章 相机不会替人作证",
+      "body_page": 192,
+      "physical_page": 195
+    },
+    {
+      "title": "第十五章 最后一站，各自抵达",
+      "body_page": 205,
+      "physical_page": 208
+    },
+    {
+      "title": "第十六章 她没有给我一个答案",
+      "body_page": 217,
+      "physical_page": 220
+    },
+    {
+      "title": "第十七章 请不要播放我的人生",
+      "body_page": 229,
+      "physical_page": 232
+    },
+    {
+      "title": "第十八章 只属于今天的放映",
+      "body_page": 243,
+      "physical_page": 246
+    },
+    {
+      "title": "第十九章 这一次，我不送你",
+      "body_page": 255,
+      "physical_page": 258
+    },
+    {
+      "title": "第二十章 明年也未必是晴天",
+      "body_page": 267,
+      "physical_page": 270
+    }
+  ]
+}
