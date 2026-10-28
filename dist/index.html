@@ -1,19 +1,23 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f4f1e9">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#151b19">
 <title>PaperShelf</title>
 <meta name="description" content="把故事留在书架上。在 PaperShelf，以纸张的方式阅读原创作品。">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css?v=20261028.2">
-<script defer src="app.js?v=20261028.2"></script>
+<script>
+// Apply the saved theme before the stylesheet renders. First visits use dark.
+try { var psTheme = JSON.parse(localStorage.getItem('paper-stories:v1') || '{}').theme; document.documentElement.dataset.theme = psTheme === 'light' ? 'light' : 'dark'; } catch (_) {}
+</script>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css?v=20261028.3">
+<script defer src="app.js?v=20261028.3"></script>
 </head>
 <body>
 <div id="shelfView">
 <header class="site-header wrap">
 <a class="brand" href="#" aria-label="PaperShelf 首页"><span class="brand-icon" aria-hidden="true">◫</span><span>PaperShelf<small>STORIES, ONE PAGE AT A TIME</small></span></a>
 <nav aria-label="主导航"><button class="nav-item active" data-nav="all">作品书架</button><button class="nav-item" data-nav="recent">阅读记录</button></nav>
-<button class="icon-button help-button" id="helpButton" aria-label="打开使用指南"><svg><use href="#i-help"/></svg><span>使用指南</span></button>
+<div class="header-actions"><button class="icon-button shelf-theme-button" id="shelfThemeButton" aria-label="切换为亮色模式" title="切换为亮色模式"><svg aria-hidden="true"><use href="#i-sun"/></svg><span id="shelfThemeLabel">亮色模式</span></button><button class="icon-button help-button" id="helpButton" aria-label="打开使用指南"><svg><use href="#i-help"/></svg><span>使用指南</span></button></div>
 </header>
 <main class="wrap">
 <section class="hero" aria-labelledby="heroTitle">
@@ -44,5 +48,5 @@
  "books/my-story/pages/data.json"]</pre></li><li><strong>更新静态站点，翻开新书</strong><p>没有构建步骤，无需后端。网站需通过 HTTP(S) 访问，可部署到普通静态空间或 GitHub Pages。</p></li></ol><div class="guide-tip"><svg><use href="#i-folder"/></svg><p>想先试读？使用「打开本地作品」选择包含 data.json 与 PNG 的文件夹。本地文件仅在本次打开期间可读，刷新后需重新选择。阅读进度保存在当前浏览器。</p></div><p class="small-note">PNG 为原版页面，夜间模式只调整阅读环境；正文的字号和配色由原稿决定。方向键翻页，Esc 关闭侧栏或退出专注。</p><button class="button primary" id="gotIt">知道了 <svg><use href="#i-arrow"/></svg></button></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg"><defs>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5m6 7-7-7 7-7"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h6l2 2h10v13H3zM3 10h18"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .6-1.5 1-1.5 2.5M12 17h.01"/></symbol><symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.5 4.5c-2.3-2-5.7-1.4-8.5 1.5C9.2 3.1 5.8 2.5 3.5 4.5c-3 2.6-1.3 6 1 8.5l7.5 7 7.5-7c2.3-2.5 4-5.9 1-8.5z"/></symbol><symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14z"/></symbol><symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></symbol><symbol id="i-focus" viewBox="0 0 24 24"><path d="M3 8V3h5m8 0h5v5m0 8v5h-5M8 21H3v-5M9 12h6M12 9v6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5c-3-2-6-2-10-1v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-4-1-7-1-10 1zm0 0v15"/></symbol></defs></svg>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5m6 7-7-7 7-7"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h6l2 2h10v13H3zM3 10h18"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .6-1.5 1-1.5 2.5M12 17h.01"/></symbol><symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.5 4.5c-2.3-2-5.7-1.4-8.5 1.5C9.2 3.1 5.8 2.5 3.5 4.5c-3 2.6-1.3 6 1 8.5l7.5 7 7.5-7c2.3-2.5 4-5.9 1-8.5z"/></symbol><symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14z"/></symbol><symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></symbol><symbol id="i-focus" viewBox="0 0 24 24"><path d="M3 8V3h5m8 0h5v5m0 8v5h-5M8 21H3v-5M9 12h6M12 9v6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5c-3-2-6-2-10-1v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-4-1-7-1-10 1zm0 0v15"/></symbol></defs></svg>
 </body></html>

@@ -6,9 +6,11 @@
   const $ = (id) => document.getElementById(id);
   const state = { books: [], filter: 'all', query: '', genre: '', sort: 'newest', current: null, page: 1, mode: 'auto', zoom: 1, focus: false, drawer: 'chapters', animating: false, localURLs: [], opening: false };
   const STORAGE = 'paper-stories:v1';
-  let saved = { books: {}, night: false, mode: 'auto' };
+  let saved = { books: {}, night: true, theme: 'dark', mode: 'auto' };
   let storageWarned = false, toastTimer, resizeObserver, turnTimer;
   try { const raw = JSON.parse(localStorage.getItem(STORAGE)); if (raw && typeof raw === 'object' && raw.books && typeof raw.books === 'object') saved = { ...saved, ...raw }; } catch { /* Empty or unavailable local storage. */ }
+  saved.theme = saved.theme === 'light' ? 'light' : 'dark';
+  saved.night = saved.theme === 'dark';
   state.mode = ['auto', 'single', 'double'].includes(saved.mode) ? saved.mode : 'auto';
   const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
   const icon = (name) => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); const use = document.createElementNS(svg.namespaceURI, 'use'); use.setAttribute('href', '#i-' + name); svg.append(use); return svg; };
@@ -17,6 +19,26 @@
   const record = (book) => { const r = saved.books[book.id]; return r && typeof r === 'object' ? { page: 1, bookmarks: [], favorite: false, ...r, bookmarks: Array.isArray(r.bookmarks) ? r.bookmarks.filter(p => Number.isInteger(p) && p >= 1 && p <= book.data.page_count) : [] } : { page: 1, bookmarks: [], favorite: false }; };
   function toast(message) { $('toast').textContent = message; $('toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 3000); }
   function persist() { try { localStorage.setItem(STORAGE, JSON.stringify(saved)); } catch { if (!storageWarned) { toast('浏览器未允许保存记录，本次仍可继续阅读。'); storageWarned = true; } } }
+  function applyTheme() {
+    const dark = saved.theme === 'dark';
+    document.documentElement.dataset.theme = saved.theme;
+    saved.night = dark;
+    $('readerView').classList.toggle('night', dark);
+    document.querySelector('meta[name="theme-color"]').content = dark ? '#151b19' : '#f4f1e9';
+    const label = dark ? '切换为亮色模式' : '切换为暗色模式';
+    for (const id of ['shelfThemeButton', 'themeButton']) {
+      const control = $(id);
+      control.setAttribute('aria-label', label);
+      control.title = label;
+      control.querySelector('use').setAttribute('href', dark ? '#i-sun' : '#i-moon');
+    }
+    $('shelfThemeLabel').textContent = dark ? '亮色模式' : '暗色模式';
+  }
+  function toggleTheme() {
+    saved.theme = saved.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    persist();
+  }
   function updateRecord(book, changes) { saved.books[book.id] = { ...record(book), ...changes }; persist(); }
   function percent(book) { const r = record(book); return r.updatedAt ? Math.round((clamp(Number(r.page) || 1, 1, book.data.page_count) - 1) / Math.max(1, book.data.page_count - 1) * 100) : 0; }
   function validateMetadata(d) {
@@ -139,7 +161,7 @@
   function openBook(book, page) {
     state.current=book;state.page=clamp(Number.isInteger(page)?page:Number(record(book).page)||1,1,book.data.page_count);state.zoom=1;state.animating=false;clearTimeout(turnTimer);
     $('shelfView').hidden=true;$('readerView').hidden=false;document.body.style.overflow='hidden';$('readerTitle').textContent=book.data.title;document.title=book.data.title+' · PaperShelf';
-    $('totalPages').textContent=book.data.page_count;$('pageInput').max=book.data.page_count;$('pageSlider').max=book.data.page_count;$('readerView').classList.toggle('night',!!saved.night);$('themeButton').setAttribute('aria-pressed',String(!!saved.night));
+    $('totalPages').textContent=book.data.page_count;$('pageInput').max=book.data.page_count;$('pageSlider').max=book.data.page_count;applyTheme();
     closeDrawer();saveProgress();renderPages();setRoute();requestAnimationFrame(fitBook);$('backToShelf').focus({preventScroll:true});
   }
   function closeBook() {
@@ -222,7 +244,7 @@
     $('helpButton').addEventListener('click',()=>$('helpDialog').showModal());$('closeHelp').addEventListener('click',()=>$('helpDialog').close());$('gotIt').addEventListener('click',()=>$('helpDialog').close());$('helpDialog').addEventListener('click',e=>{if(e.target===$('helpDialog')){const r=$('helpDialog').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('helpDialog').close();}});
     $('openFolder').addEventListener('click',()=>$('folderInput').click());$('folderInput').addEventListener('change',async e=>{await importFolder(e.target.files);e.target.value='';});
     $('backToShelf').addEventListener('click',closeBook);$('previousPage').addEventListener('click',previous);$('nextPage').addEventListener('click',next);$('bookmarkButton').addEventListener('click',toggleBookmark);$('tocButton').addEventListener('click',()=>openDrawer());$('closeDrawer').addEventListener('click',()=>{closeDrawer();$('tocButton').focus();});$('drawerShade').addEventListener('click',closeDrawer);document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{state.drawer=b.dataset.panel;renderDrawer();}));
-    $('themeButton').addEventListener('click',()=>{saved.night=!saved.night;persist();$('readerView').classList.toggle('night',saved.night);$('themeButton').setAttribute('aria-pressed',String(saved.night));});$('focusButton').addEventListener('click',()=>setFocus(!state.focus));$('exitFocus').addEventListener('click',()=>setFocus(false));
+    $('themeButton').addEventListener('click',toggleTheme);$('shelfThemeButton').addEventListener('click',toggleTheme);$('focusButton').addEventListener('click',()=>setFocus(!state.focus));$('exitFocus').addEventListener('click',()=>setFocus(false));
     $('fullscreenButton').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('readerView').requestFullscreen();}catch{toast('当前浏览器不支持全屏。');}});
     $('layoutButton').addEventListener('click',()=>{if(window.innerWidth<760){toast('当前屏幕使用单页阅读，横向宽屏可切换双页。');return;}state.mode=isDouble()?'single':'double';saved.mode=state.mode;persist();renderPages();});$('zoomIn').addEventListener('click',()=>changeZoom(.25));$('zoomOut').addEventListener('click',()=>changeZoom(-.25));$('zoomReset').addEventListener('click',()=>{state.zoom=1;fitBook();});
     $('pageForm').addEventListener('submit',e=>{e.preventDefault();navigate(Number($('pageInput').value),false);$('pageInput').blur();});$('pageSlider').addEventListener('input',e=>navigate(Number(e.target.value),false));
@@ -236,5 +258,5 @@
     let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(state.current)renderPages();},100);});if('ResizeObserver' in window){resizeObserver=new ResizeObserver(()=>fitBook());resizeObserver.observe($('bookViewport'));}
     window.addEventListener('pagehide',()=>{saveProgress();});
   }
-  bind();loadLibrary();
+  applyTheme();bind();loadLibrary();
 })();
