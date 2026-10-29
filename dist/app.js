@@ -4,7 +4,7 @@
 'use strict';
 (() => {
   const $ = (id) => document.getElementById(id);
-  const state = { books: [], filter: 'all', query: '', genre: '', sort: 'newest', current: null, page: 1, mode: 'auto', zoom: 1, focus: false, drawer: 'chapters', animating: false, localURLs: [], opening: false };
+  const state = { books: [], filter: 'all', query: '', genre: '', sort: 'newest', current: null, page: 1, mode: 'auto', fit: 'page', zoom: 1, focus: false, drawer: 'chapters', animating: false, localURLs: [], opening: false };
   const STORAGE = 'paper-stories:v1';
   let saved = { books: {}, night: true, theme: 'dark', mode: 'auto' };
   let storageWarned = false, toastTimer, resizeObserver, turnTimer;
@@ -12,6 +12,7 @@
   saved.theme = saved.theme === 'light' ? 'light' : 'dark';
   saved.night = saved.theme === 'dark';
   state.mode = ['auto', 'single', 'double'].includes(saved.mode) ? saved.mode : 'auto';
+  state.fit = saved.fit === 'width' ? 'width' : 'page';
   const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
   const icon = (name) => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); const use = document.createElementNS(svg.namespaceURI, 'use'); use.setAttribute('href', '#i-' + name); svg.append(use); return svg; };
   const button = (cls, text, onClick) => { const node = el('button', cls, text); node.type = 'button'; node.addEventListener('click', onClick); return node; };
@@ -150,7 +151,12 @@
     renderHero();renderGenres();renderShelf();toast(added?'已打开 '+added+' 部作品，刷新后需重新选择文件夹。':'没有新增作品。');
     if(errors.length){$('libraryErrors').hidden=false;$('libraryErrors').textContent=errors.join('\n');}
   }
-  function isDouble() { return window.innerWidth>=760 && state.mode!=='single' && (state.mode==='double'||state.mode==='auto'); }
+  function isDouble() {
+    if (window.innerWidth < 760 || state.mode === 'single') return false;
+    if (state.mode === 'double') return true;
+    // Portrait tablets get a larger single page; landscape desktops keep the spread.
+    return window.innerWidth >= 1100 && window.innerWidth / window.innerHeight >= 1.3;
+  }
   function anchor(page=state.page) { return isDouble() && page>1 ? page-page%2 : page; }
   function visiblePages(page=state.page) { const start=anchor(page);return isDouble()&&start>1?[start,start+1].filter(p=>p<=state.current.data.page_count):[start]; }
   function setRoute() {
@@ -187,9 +193,22 @@
   }
   function fitBook(){
     if(!state.current)return;
-    const viewport=$('bookViewport'),pages=visiblePages(),count=pages.length;const width=Math.max(40,viewport.clientWidth-10),height=Math.max(40,viewport.clientHeight-10);const baseHeight=Math.min(height,width/(148/210*count));const pageHeight=baseHeight*state.zoom;const pageWidth=pageHeight*148/210;
+    const viewport=$('bookViewport'),pages=visiblePages(),count=pages.length;
+    const width=Math.max(40,viewport.clientWidth-4),height=Math.max(40,viewport.clientHeight-4);
+    const widthHeight=width/(148/210*count);
+    const baseHeight=state.fit==='width'?widthHeight:Math.min(height,widthHeight);
+    const pageHeight=baseHeight*state.zoom,pageWidth=pageHeight*148/210;
     $('book').style.width=pageWidth*count+'px';$('book').style.height=pageHeight+'px';document.querySelectorAll('#book .book-page').forEach(n=>n.style.width=pageWidth+'px');$('zoomReset').textContent=Math.round(state.zoom*100)+'%';
-    $('zoomOut').disabled=state.zoom<=.75;$('zoomIn').disabled=state.zoom>=2.5;
+    $('zoomOut').disabled=state.zoom<=.5;$('zoomIn').disabled=state.zoom>=4;
+    $('fitButton').textContent=state.fit==='width'?'整页':'适宽';
+    const fitLabel=state.fit==='width'?'切换为完整显示一页':'适合宽度，放大书页并上下滚动';
+    $('fitButton').title=fitLabel;$('fitButton').setAttribute('aria-label',fitLabel);
+    $('fitButton').setAttribute('aria-pressed',String(state.fit==='width'));
+    viewport.classList.toggle('scroll-reading',state.fit==='width'||state.zoom>1);
+    viewport.classList.toggle('can-scroll-y',pageHeight>height+1);
+    viewport.classList.toggle('can-scroll-x',pageWidth*count>width+1);
+    $('focusButton').title=state.focus?'退出专注阅读（Esc）':'专注阅读，书页占满屏幕（F）';
+    $('focusButton').setAttribute('aria-label',$('focusButton').title);
   }
   function updateControls(){
     const book=state.current;if(!book)return;const p=state.page,total=book.data.page_count,spread=visiblePages();const pct=percent(book);
@@ -234,8 +253,13 @@
       if(book.pdf){const link=el('a','detail-link','下载原版 PDF');link.href=book.pdf;link.download=book.data.title+'.pdf';link.append(el('span','','↗'));box.append(link);}
     }
   }
-  function setFocus(value){state.focus=value;$('readerView').classList.toggle('focus',value);$('focusButton').setAttribute('aria-pressed',String(value));requestAnimationFrame(fitBook);}
-  function changeZoom(delta){state.zoom=clamp(Math.round((state.zoom+delta)*100)/100,.75,2.5);fitBook();}
+  function setFocus(value){state.focus=value;$('readerView').classList.toggle('focus',value);$('focusButton').setAttribute('aria-pressed',String(value));requestAnimationFrame(fitBook);if(state.current)$(value?'exitFocus':'focusButton').focus({preventScroll:true});}
+  function changeZoom(delta){state.zoom=clamp(Math.round((state.zoom+delta)*100)/100,.5,4);fitBook();}
+  function toggleFit(){
+    state.fit=state.fit==='width'?'page':'width';state.zoom=1;saved.fit=state.fit;persist();
+    fitBook();$('bookViewport').scrollTo(0,0);
+    toast(state.fit==='width'?'书页已铺满宽度，可上下滚动阅读。':'已完整显示书页。');
+  }
   function bind(){
     $('heroRead').addEventListener('click',()=>state.featured&&openBook(state.featured));$('featureRead').addEventListener('click',()=>state.featured&&openBook(state.featured));$('heroBook').addEventListener('click',()=>state.featured&&openBook(state.featured));
     document.querySelectorAll('[data-filter],[data-nav]').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter||b.dataset.nav;renderShelf();if(b.dataset.nav==='recent')$('collection').scrollIntoView();}));
@@ -246,15 +270,26 @@
     $('backToShelf').addEventListener('click',closeBook);$('previousPage').addEventListener('click',previous);$('nextPage').addEventListener('click',next);$('bookmarkButton').addEventListener('click',toggleBookmark);$('tocButton').addEventListener('click',()=>openDrawer());$('closeDrawer').addEventListener('click',()=>{closeDrawer();$('tocButton').focus();});$('drawerShade').addEventListener('click',closeDrawer);document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{state.drawer=b.dataset.panel;renderDrawer();}));
     $('themeButton').addEventListener('click',toggleTheme);$('shelfThemeButton').addEventListener('click',toggleTheme);$('focusButton').addEventListener('click',()=>setFocus(!state.focus));$('exitFocus').addEventListener('click',()=>setFocus(false));
     $('fullscreenButton').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('readerView').requestFullscreen();}catch{toast('当前浏览器不支持全屏。');}});
-    $('layoutButton').addEventListener('click',()=>{if(window.innerWidth<760){toast('当前屏幕使用单页阅读，横向宽屏可切换双页。');return;}state.mode=isDouble()?'single':'double';saved.mode=state.mode;persist();renderPages();});$('zoomIn').addEventListener('click',()=>changeZoom(.25));$('zoomOut').addEventListener('click',()=>changeZoom(-.25));$('zoomReset').addEventListener('click',()=>{state.zoom=1;fitBook();});
+    $('layoutButton').addEventListener('click',()=>{if(window.innerWidth<760){toast('当前屏幕使用单页阅读，横向宽屏可切换双页。');return;}state.mode=isDouble()?'single':'double';saved.mode=state.mode;persist();renderPages();});$('zoomIn').addEventListener('click',()=>changeZoom(.25));$('zoomOut').addEventListener('click',()=>changeZoom(-.25));$('zoomReset').addEventListener('click',()=>{state.zoom=1;fitBook();$('bookViewport').scrollTo(0,0);});
+    $('fitButton').addEventListener('click',toggleFit);
     $('pageForm').addEventListener('submit',e=>{e.preventDefault();navigate(Number($('pageInput').value),false);$('pageInput').blur();});$('pageSlider').addEventListener('input',e=>navigate(Number(e.target.value),false));
     document.addEventListener('keydown',e=>{
       if(!state.current)return;
       if(e.key==='Escape'){if(!$('readerDrawer').hidden){closeDrawer();$('tocButton').focus();}else if(state.focus)setFocus(false);return;}
       if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||!$('readerDrawer').hidden||(e.target.tagName==='BUTTON'&&e.key===' '))return;
+      if(e.ctrlKey||e.metaKey||e.altKey)return;
+      if(e.key.toLowerCase()==='f'){e.preventDefault();setFocus(!state.focus);return;}
+      // When enlarged, these keys scroll through the page before turning it.
+      const viewport=$('bookViewport');
+      if(viewport.classList.contains('can-scroll-y')&&['PageDown','PageUp',' '].includes(e.key)){
+        const down=e.key!=='PageUp'&&!e.shiftKey;
+        const remaining=down?viewport.scrollHeight-viewport.clientHeight-viewport.scrollTop:viewport.scrollTop;
+        if(remaining>2){e.preventDefault();viewport.scrollBy({top:(down?1:-1)*viewport.clientHeight*.85,behavior:'auto'});return;}
+        e.preventDefault();if(down)next();else{previous();viewport.scrollTop=viewport.scrollHeight;}return;
+      }
       if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next();}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();previous();}else if(e.key==='Home'){e.preventDefault();navigate(1,false);}else if(e.key==='End'){e.preventDefault();navigate(state.current.data.page_count,false);}
     });
-    let touch=null;$('bookViewport').addEventListener('touchstart',e=>{if(e.touches.length===1)touch={x:e.touches[0].clientX,y:e.touches[0].clientY};else touch=null;},{passive:true});$('bookViewport').addEventListener('touchend',e=>{if(!touch||state.zoom>1)return;const dx=e.changedTouches[0].clientX-touch.x,dy=e.changedTouches[0].clientY-touch.y;touch=null;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4){if(dx<0)next();else previous();}},{passive:true});
+    let touch=null;$('bookViewport').addEventListener('touchstart',e=>{if(e.touches.length===1)touch={x:e.touches[0].clientX,y:e.touches[0].clientY};else touch=null;},{passive:true});$('bookViewport').addEventListener('touchend',e=>{if(!touch||state.zoom>1||$('bookViewport').classList.contains('can-scroll-x')){touch=null;return;}const dx=e.changedTouches[0].clientX-touch.x,dy=e.changedTouches[0].clientY-touch.y;touch=null;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4){if(dx<0)next();else previous();}},{passive:true});
     let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(state.current)renderPages();},100);});if('ResizeObserver' in window){resizeObserver=new ResizeObserver(()=>fitBook());resizeObserver.observe($('bookViewport'));}
     window.addEventListener('pagehide',()=>{saveProgress();});
   }
